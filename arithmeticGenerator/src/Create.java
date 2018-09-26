@@ -1,58 +1,89 @@
-import java.util.Random;
+import java.util.*;
 
 public class Create {
+    /**
+     * 式子生成器
+     * totalOperator 为 当前式子 的 运算符 数组
+     * totalNumber 为 当前式子 的 操作数 数组
+     * totalFraction 为 当前式子 的 运算符 数组
+     * @param r 为 操作数 的 范围
+     * @return formula 为 当前式子 的 字符串形式
+     */
     public String createFormula(int r){
         Random random = new Random();
-        String[] operator = {"+","-","*","/"};//{"＋","－","×","÷","＝"}
+        //String[] operator = {"+","-","*","/"};
+        String[] operator = {"＋","－","×","÷","＝"};
 
         //运算符 && 操作数 && 式子
         String[] totalOperator = new String[1 + random.nextInt(2)];
-        int[] totalNumber = new int[totalOperator.length+1];
+        //Double[] totalNumber = new Double[totalOperator.length+1];
+        String[] totalFraction = new String[totalOperator.length+1];
         String formula = new String();
+        //是否包含分数
+        Boolean hasFraction = false;
 
         //随机产生  操作数 && 运算符
-        for (int i=0;i<totalOperator.length;i++) {
+        for (int i=0;i<totalFraction.length;i++) {
 
             //操作数：
             int fractionOrNot = random.nextInt(2);
-            System.out.println("fractionOrNot："+fractionOrNot);
+            //System.out.println("fractionOrNot["+i+"]："+fractionOrNot);
             if (fractionOrNot == 0) {
-                totalNumber[i] = random.nextInt(r);
+                int integralPart = random.nextInt(r);
+                //totalNumber[i] = (double)integralPart;
+                totalFraction[i] = String.valueOf(integralPart);
             } else {
-                int denominator = random.nextInt(11);
+                int denominator = 1+random.nextInt(9);
                 int molecule = random.nextInt(denominator);
                 int integralPart = random.nextInt(r);
 
-                totalNumber[i] = integralPart + (molecule / denominator);//分数
-                System.out.println("totalNumber：["+i+"]"+totalNumber[i]);
+                //分数
+                //totalNumber[i] = integralPart + (double)molecule / denominator;
+                if (integralPart == 0 && molecule > 0) {
+                    totalFraction[i] = molecule + "/" + denominator;
+                    hasFraction = true;
+                }
+                else if (molecule == 0)
+                    totalFraction[i] = String.valueOf(integralPart);
+                else {
+                    totalFraction[i] = integralPart + "'" + molecule + "/" + denominator;
+                    hasFraction = true;
+                }
             }
+            //System.out.println("totalNumber："+Arrays.toString(totalNumber));
+        }
 
-            //运算符
-            if (i < totalOperator.length) {
-                totalOperator[i] = operator[random.nextInt(3)];
-            }
+        //运算符
+        for (int i=0;i < totalOperator.length;i++) {
+            if (hasFraction)
+                totalOperator[i] = operator[random.nextInt(2)];
+            else
+                totalOperator[i] = operator[random.nextInt(4)];
         }
 
         //选择式子括号起始位置
-        int choose = random.nextInt(totalNumber.length);
+        int choose = random.nextInt(totalFraction.length);
         //生成式子
-        for (int i=0;i<totalNumber.length;i++) {
-
+        for (int i=0;i<totalFraction.length;i++) {
 
             if (i == choose && choose<totalOperator.length) {
-                formula = formula + "(" + totalNumber[i] + totalOperator[i] ;
-            } else if (i == totalNumber.length - 1 && i == choose+1 && choose<totalOperator.length) {
-                formula = formula + totalNumber[i] + ")" + "=";
+                formula = formula + "(" + totalFraction[i] + totalOperator[i] ;
+            } else if (i == totalFraction.length - 1 && i == choose+1 && choose<totalOperator.length) {
+                formula = formula + totalFraction[i] + ")" + "=";
             } else if (i == choose+1 && choose<totalOperator.length) {
-                formula = formula + totalNumber[i] + ")" + totalOperator[i];
-            } else if (i == totalNumber.length - 1) {
-                formula = formula + totalNumber[i] + "=";
+                formula = formula + totalFraction[i] + ")" + totalOperator[i];
+            } else if (i == totalFraction.length - 1) {
+                formula = formula + totalFraction[i] + "=";
             } else {
-                formula = formula + totalNumber[i] + totalOperator[i];
+                formula = formula + totalFraction[i] + totalOperator[i];
             }
         }
 
-        System.out.println("formula："+formula);
+        //检查运算结果
+        Check check = new Check();
+        String ansFormula = check.checkout(formula);
+
+        System.out.println("formula："+formula+ansFormula);
         return formula;
     }
 }
