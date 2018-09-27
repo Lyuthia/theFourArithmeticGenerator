@@ -9,7 +9,7 @@ public class Create {
      * @param r 为 操作数 的 范围
      * @return formula 为 当前式子 的 字符串形式
      */
-    public String createFormula(int r){
+    public String[] createFormula(int r){
         Random random = new Random();
         //String[] operator = {"+","-","*","/"};
         String[] operator = {"＋","－","×","÷","＝"};
@@ -36,6 +36,12 @@ public class Create {
                 int denominator = 1+random.nextInt(9);
                 int molecule = random.nextInt(denominator);
                 int integralPart = random.nextInt(r);
+                //化简分数
+                if (molecule!=0) {
+                    int commonFactor = commonFactor(denominator, molecule);
+                    denominator /= commonFactor;
+                    molecule /= commonFactor;
+                }
 
                 //分数
                 //totalNumber[i] = integralPart + (double)molecule / denominator;
@@ -62,7 +68,9 @@ public class Create {
         }
 
         //选择式子括号起始位置
-        int choose = random.nextInt(totalFraction.length);
+        int choose = totalFraction.length;
+        if (totalFraction.length != 2 )
+            choose = random.nextInt(totalFraction.length);
         //生成式子
         for (int i=0;i<totalFraction.length;i++) {
 
@@ -81,9 +89,29 @@ public class Create {
 
         //检查运算结果
         Check check = new Check();
-        String ansFormula = check.checkout(formula);
+        String[] ansFormula = check.checkout(formula,3*totalOperator.length+2+1);//2*totalOperator.length+3
 
-        System.out.println("formula："+formula+ansFormula);
-        return formula;
+        //System.out.println("ansFormula："+Arrays.toString(ansFormula));
+        if (ansFormula!=null)
+            return ansFormula;
+        return null;
     }
+
+    /**
+     * 求最大公因数，以化简分数
+     * @param x 为 操作数 的 分母
+     * @param y 为 操作数 的 分子
+     * @return formula 为 当前式子 的 字符串形式
+     */
+    public int commonFactor(int x,int y)
+    {
+        while(true)
+        {
+            if(x%y==0)return y;
+            int temp=y;
+            y=x%y;
+            x=temp;
+        }
+    }
+
 }

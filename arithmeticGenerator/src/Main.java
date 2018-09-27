@@ -45,8 +45,10 @@ public class Main {
 
             /* **** 执行函数 **** */
             System.out.println("n: " + n + ", r: " + r);
-            Create create = new Create();
-            String formula = create.createFormula(r);
+            //Create create = new Create();
+            //String formula = create.createFormula(r);
+            problemSet makefile = new problemSet();
+            makefile.createProblemSet(n,r);
         }
     }
 }
