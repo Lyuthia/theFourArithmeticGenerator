@@ -7,6 +7,9 @@ public class Main {
         /* **** 输入指令 **** */
             int n = 10;
             int r = 10;
+            String submitPath = null;
+            String answersPath = null;
+
             try {
                 // 获取输入指令
                 System.out.println("Please enter the command：");
@@ -26,12 +29,24 @@ public class Main {
                                 break;
                             case "-r":
                                 r = Integer.parseInt(arr[i + 1]);
+                                if (r < 1) {
+                                    System.out.println("对不起，只允许大于等于1的自然数！");
+                                    return; //结束运行
+                                }
                                 break;
                             case "-e":
+                                submitPath = arr[i + 1];
+                                if (submitPath == null) {
+                                    System.out.println("对不起，没有输入相应文件路径，请重新输入");
+                                    return; //结束运行
+                                }
                                 break;
                             case "-a":
-                                break;
-                            case "-g":
+                                answersPath = arr[i + 1];
+                                if (answersPath == null) {
+                                    System.out.println("对不起，没有输入相应文件路径，请重新输入");
+                                    return; //结束运行
+                                }
                                 break;
                             default:
                                 System.out.println("指令输入错误!");
@@ -45,10 +60,11 @@ public class Main {
 
             /* **** 执行函数 **** */
             System.out.println("n: " + n + ", r: " + r);
-            //Create create = new Create();
-            //String formula = create.createFormula(r);
             problemSet makefile = new problemSet();
-            makefile.createProblemSet(n,r);
+            if (submitPath != null && answersPath != null)
+                makefile.createGradeFile(submitPath,answersPath);
+            else
+                makefile.createProblemSet(n,r);
         }
     }
 }

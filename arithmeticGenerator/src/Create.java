@@ -1,41 +1,39 @@
-import java.util.*;
+import java.util.Random;
 
 public class Create {
     /**
      * 式子生成器
      * totalOperator 为 当前式子 的 运算符 数组
-     * totalNumber 为 当前式子 的 操作数 数组
-     * totalFraction 为 当前式子 的 运算符 数组
+     * formula 为 当前式子 的 字符串形式
+     * totalFraction 为 当前式子 的 操作数 数组
      * @param r 为 操作数 的 范围
-     * @return formula 为 当前式子 的 字符串形式
+     * @return ansFormula 为 当前式子 的 （改良）后缀表达式 && 结果 && 字符串形式 的 数组
      */
     public String[] createFormula(int r){
         Random random = new Random();
-        //String[] operator = {"+","-","*","/"};
         String[] operator = {"＋","－","×","÷","＝"};
 
         //运算符 && 操作数 && 式子
-        String[] totalOperator = new String[1 + random.nextInt(2)];
-        //Double[] totalNumber = new Double[totalOperator.length+1];
+        String[] totalOperator = new String[1 + random.nextInt(3)];
         String[] totalFraction = new String[totalOperator.length+1];
         String formula = new String();
         //是否包含分数
         Boolean hasFraction = false;
 
-        //随机产生  操作数 && 运算符
+        //随机产生 操作数：
         for (int i=0;i<totalFraction.length;i++) {
 
-            //操作数：
+            // 随机确定生成 整数 或 分数
             int fractionOrNot = random.nextInt(2);
-            //System.out.println("fractionOrNot["+i+"]："+fractionOrNot);
-            if (fractionOrNot == 0) {
-                int integralPart = random.nextInt(r);
-                //totalNumber[i] = (double)integralPart;
+            //生成
+            if (fractionOrNot == 0) { //生成整数
+                int integralPart = random.nextInt(r+1);
                 totalFraction[i] = String.valueOf(integralPart);
-            } else {
-                int denominator = 1+random.nextInt(9);
+            } else { //生成分数
+                int denominator = 1+random.nextInt(r);
                 int molecule = random.nextInt(denominator);
-                int integralPart = random.nextInt(r);
+                int integralPart = random.nextInt(r+1);
+
                 //化简分数
                 if (molecule!=0) {
                     int commonFactor = commonFactor(denominator, molecule);
@@ -43,8 +41,7 @@ public class Create {
                     molecule /= commonFactor;
                 }
 
-                //分数
-                //totalNumber[i] = integralPart + (double)molecule / denominator;
+                //输出最简分数
                 if (integralPart == 0 && molecule > 0) {
                     totalFraction[i] = molecule + "/" + denominator;
                     hasFraction = true;
@@ -56,10 +53,9 @@ public class Create {
                     hasFraction = true;
                 }
             }
-            //System.out.println("totalNumber："+Arrays.toString(totalNumber));
         }
 
-        //运算符
+        //随机生成 运算符：
         for (int i=0;i < totalOperator.length;i++) {
             if (hasFraction)
                 totalOperator[i] = operator[random.nextInt(2)];
@@ -67,13 +63,13 @@ public class Create {
                 totalOperator[i] = operator[random.nextInt(4)];
         }
 
-        //选择式子括号起始位置
+        //随机选择式子括号起始位置；当式子形如 a+b= 时，不加括号
         int choose = totalFraction.length;
         if (totalFraction.length != 2 )
             choose = random.nextInt(totalFraction.length);
-        //生成式子
-        for (int i=0;i<totalFraction.length;i++) {
 
+        //合成式子 formula
+        for (int i=0;i<totalFraction.length;i++) {
             if (i == choose && choose<totalOperator.length) {
                 formula = formula + "(" + totalFraction[i] + totalOperator[i] ;
             } else if (i == totalFraction.length - 1 && i == choose+1 && choose<totalOperator.length) {
@@ -88,8 +84,8 @@ public class Create {
         }
 
         //检查运算结果
-        Check check = new Check();
-        String[] ansFormula = check.checkout(formula,3*totalOperator.length+2+1);//2*totalOperator.length+3
+        CheckAns checkAns = new CheckAns();
+        String[] ansFormula = checkAns.checkout(formula,3*totalOperator.length+2+1);//2*totalOperator.length+3+1
 
         //System.out.println("ansFormula："+Arrays.toString(ansFormula));
         if (ansFormula!=null)
@@ -101,10 +97,9 @@ public class Create {
      * 求最大公因数，以化简分数
      * @param x 为 操作数 的 分母
      * @param y 为 操作数 的 分子
-     * @return formula 为 当前式子 的 字符串形式
+     * @return y 为 最大公因数
      */
-    public int commonFactor(int x,int y)
-    {
+    public int commonFactor(int x,int y) {
         while(true)
         {
             if(x%y==0)return y;

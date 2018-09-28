@@ -1,10 +1,11 @@
-import java.util.*;
+import java.util.Stack;
+import java.util.HashMap;
 
-public class Check {
+public class CheckAns {
     /**
-     * 检查式子
+     * 检查式子结果、生成逆波兰表达式
      * @param formula 为 式子
-     * @return ansFormula 为 当前式子 的 计算结果，若ansFormula为null，则不符合条件
+     * @return reversePolishNotation 为 当前式子 的 （改良）后缀表达式 && 结果 && 字符串形式 的 数组
      */
     public String[] checkout(String formula,int length){
         // 操作数 && 操作符 && 逆波兰表达式
@@ -132,7 +133,7 @@ public class Check {
     }
 
     /**
-     * 计算整数运算结果
+     * 计算式子运算结果
      * @param m 为 操作数
      * @param n 为 操作数
      * @param operator 为 运算符
@@ -141,152 +142,79 @@ public class Check {
     private String calculate(String m,String n,String operator) {
         String ansFormula = null;//计算结果
         char op = operator.charAt(0);//符号
-        //System.out.println(m + operator + n);
+        int[] indexFraction = {m.indexOf('\''), m.indexOf('/'), n.indexOf('\''), n.indexOf('/')};//分数 各部分 切割位置
 
-        //处理分数运算
-        int[] indexFraction = new int[4];
-        indexFraction[0] = m.indexOf('\'');
-        indexFraction[1] = m.indexOf('/');
-        indexFraction[2] = n.indexOf('\'');
-        indexFraction[3] = n.indexOf('/');
-
-        if (indexFraction[1] > 0 && indexFraction[3] > 0) {
+        //处理 含分数 的 运算
+        if (indexFraction[1] > 0 || indexFraction[3] > 0) {
             int[] denominator = new int[3];
             int[] molecule = new int[3];
             int[] integralPart = new int[3];
 
-            for (int i = 0; i < m.length(); i++) {
-                if (i < indexFraction[0]) {
-                    integralPart[0] = integralPart[0] + m.charAt(i) - '0';
-                }else if (i > indexFraction[0] && i < indexFraction[1]) {
-                    molecule[0] = molecule[0] + m.charAt(i) - '0';
-                }else if (i > indexFraction[1]){
-                    denominator[0] = denominator[0] + m.charAt(i) - '0';
-                }
-            }
-
-            for (int i = 0; i < n.length(); i++) {
-                if (i < indexFraction[2]) {
-                    integralPart[1] = integralPart[1] + n.charAt(i) - '0';
-                } else if (i > indexFraction[2] && i < indexFraction[3]){
-                    molecule[1] = molecule[1] + n.charAt(i) - '0';
-                }else if (i > indexFraction[3]) {
-                    denominator[1] = denominator[1] + n.charAt(i) - '0';
-                }
-            }
-
-            switch (op) {
-                case '＋': {
-                    integralPart[2] = integralPart[0] + integralPart[1];
-                    molecule[2] = molecule[0] * denominator[1] + molecule[1] * denominator[0];
-                    denominator[2] = denominator[0] * denominator[1];
-
-                    if (molecule[2] >= denominator[2]) {
-                        integralPart[2] = integralPart[2] + molecule[2] / denominator[2];
-                        molecule[2] = molecule[2] % denominator[2];
-                    }
-                    ansFormula = String.valueOf(integralPart[2]) + "'" + String.valueOf(molecule[2]) + '/' + String.valueOf(denominator[2]);
-                    break;
-                }
-                case '－': {
-                    integralPart[2] = integralPart[0] - integralPart[1];
-                    molecule[2] = molecule[0] * denominator[1] - molecule[1] * denominator[0];
-                    denominator[2] = denominator[0] * denominator[1];
-
-                    if (molecule[2] < 0) {
-                        integralPart[2]--;
-                        molecule[2] = denominator[2] - molecule[2];
-                    }
-                    //System.out.println(integralPart[2]+","+molecule[2] +"," + denominator[2]);
-                    //分数显示
-                    if (integralPart[2] == 0 && molecule[2] > 0) {
-                        ansFormula = String.valueOf(molecule[2]) + '/' + String.valueOf(denominator[2]);
-                    } else if (molecule[2] == 0)
-                        ansFormula = String.valueOf(integralPart[2]);
-                    else {
-                        ansFormula = String.valueOf(integralPart[2]) + "'" + String.valueOf(molecule[2]) + '/' + String.valueOf(denominator[2]);
-                    }
-
-                    if (integralPart[2] < 0) {
-                        System.out.println("fraCal1:"+ansFormula);
-                        return null;
-                    }
-                    break;
-                }
-            }
-            //System.out.println("fraCal1:"+ansFormula);
-            return ansFormula;
-
-        } else if (indexFraction[1] > 0 || indexFraction[3] > 0) {
-            int denominator = 0;
-            int molecule = 0;
-            int[] integralPart = new int[3];
-
+            //切割分数
             if (indexFraction[1] > 0) {
                 for (int i = 0; i < m.length(); i++) {
                     if (i < indexFraction[0]) {
-                        integralPart[0] = integralPart[0] + m.charAt(i) - '0';
-                    }else if (i > indexFraction[0] && i < indexFraction[1]) {
-                        molecule = molecule + m.charAt(i) - '0';
-                    }else if (i > indexFraction[1]) {
-                        denominator = denominator + m.charAt(i) - '0';
+                        integralPart[0] = Integer.parseInt(integralPart[0] + String.valueOf(m.charAt(i) - '0'));
+                    } else if (i > indexFraction[0] && i < indexFraction[1]) {
+                        molecule[0] = Integer.parseInt(molecule[0] + String.valueOf(m.charAt(i) - '0'));
+                    } else if (i > indexFraction[1]) {
+                        denominator[0] = Integer.parseInt(denominator[0] + String.valueOf(m.charAt(i) - '0'));
                     }
                 }
-                integralPart[1] = Integer.parseInt(n);
-            } else if (indexFraction[3] > 0) {
-                for (int i = 0; i < n.length(); i++) {
-                    if (i < indexFraction[2]) {
-                        integralPart[1] = integralPart[1] + n.charAt(i) - '0';
-                    }else if (i > indexFraction[2] && i < indexFraction[3]) {
-                        molecule = molecule + n.charAt(i) - '0';
-                    }else if (i > indexFraction[3]) {
-                        denominator = denominator + n.charAt(i) - '0';
-                    }
-                }
+            } else {
                 integralPart[0] = Integer.parseInt(m);
+                denominator[0] = 1;
+                molecule[0] = 0;
             }
 
+            if (indexFraction[3] > 0) {
+                for (int i = 0; i < n.length(); i++) {
+                    if (i < indexFraction[2]) {
+                        integralPart[1] = Integer.parseInt(integralPart[1] + String.valueOf(n.charAt(i) - '0'));
+                    } else if (i > indexFraction[2] && i < indexFraction[3]) {
+                        molecule[1] = Integer.parseInt(molecule[1] + String.valueOf(n.charAt(i) - '0'));
+                    } else if (i > indexFraction[3]) {
+                        denominator[1] = denominator[1] + n.charAt(i) - '0';
+                    }
+                }
+            } else {
+                integralPart[1] = Integer.parseInt(n);
+                denominator[1] = 1;
+                molecule[1] = 0;
+            }
+
+            //分数运算
             switch (op) {
                 case '＋': {
-                    integralPart[2] = integralPart[0] + integralPart[1];
-
-                    ansFormula = String.valueOf(integralPart[2]) + "'" + String.valueOf(molecule) + '/' + String.valueOf(denominator);
+                    denominator[2] = denominator[0] * denominator[1];
+                    molecule[2] = integralPart[0] * denominator[2] + molecule[0] * denominator[1]
+                            + integralPart[1] * denominator[2] + molecule[1] * denominator[0];
                     break;
                 }
                 case '－': {
-                    //System.out.println(integralPart[0] + ","+ integralPart[1]+","+molecule +"," + denominator);
-                    integralPart[2] = integralPart[0] - integralPart[1];
-
-                    if (indexFraction[3] > 0) {
-                        if (integralPart[2]>0) {
-                            integralPart[2]--;
-                            molecule = denominator - molecule;
-                        } else if (integralPart[2]==0){
-                            ansFormula = "-";
-                        }
-                    }
-
-                    //System.out.println(integralPart[2]+","+molecule +"," + denominator);
-                    //分数显示
-                    if (integralPart[2] == 0 && molecule > 0)
-                        ansFormula = String.valueOf(molecule) + '/' + String.valueOf(denominator);
-                    else if (molecule == 0)
-                        ansFormula = String.valueOf(integralPart[2]);
-                    else
-                        ansFormula = String.valueOf(integralPart[2]) + "'" + String.valueOf(molecule) + '/' + String.valueOf(denominator);
-
-                    if (integralPart[2] < 0) {
-                        //System.out.println("fraCal2:" + ansFormula);
-                        return null;
-                    }
+                    denominator[2] = denominator[0] * denominator[1];
+                    molecule[2] = integralPart[0] * denominator[2] + molecule[0] * denominator[1]
+                            - integralPart[1] * denominator[2] - molecule[1] * denominator[0];
                     break;
                 }
+                default:
+                    return null;
             }
-            //System.out.println("fraCal2:"+ansFormula);
-            return ansFormula;
-        } else {
 
-            //处理整数运算
+            //提取整数部分
+            if (molecule[2] >= denominator[2] && molecule[2]>0) {
+                integralPart[2] = molecule[2] / denominator[2];
+                molecule[2] = Math.abs(molecule[2] % denominator[2]);
+            } else if (molecule[2]<0) {
+                return null;
+            }
+
+            //化简分数
+            if (molecule[2] != 0) {
+                ansFormula = greatFraction(integralPart[2],molecule[2],denominator[2]);
+            } else ansFormula = String.valueOf(integralPart[2]);
+
+        } else { //处理整数运算
             int a = Integer.parseInt(m);
             int b = Integer.parseInt(n);
 
@@ -298,10 +226,8 @@ public class Check {
                 case '－': {
                     if (a - b >= 0)
                         ansFormula = String.valueOf(a - b);
-                    else {
-                        //System.out.println("intCal:"+ansFormula);
+                    else
                         return null;
-                    }
                     break;
                 }
                 case '×': {
@@ -310,54 +236,48 @@ public class Check {
                 }
                 case '÷': {
                     if (b == 0) {
-                        //System.out.println("intCal:"+ansFormula);
                         return null;
-                    }else if (a % b != 0)
-                        ansFormula = a / b + "'" + a % b + "/" + b;
-                    else
+                    } else if (a % b != 0) {
+                        ansFormula = a % b + "/" + b;
+                        if (a / b > 0) ansFormula = a / b + "'" + ansFormula;
+                    } else
                         ansFormula = String.valueOf(a / b);
                     break;
                 }
             }
-            //System.out.println("intCal:"+ansFormula);
-            return ansFormula;
         }
+        return ansFormula;
     }
-
-//    /**
-//     * 分割分数，以进行计算
-//     * @param x 为 操作数 的 分母
-//     * @param y 为 操作数 的 分子
-//     * @return formula 为 当前式子 的 字符串形式
-//     */
-//    public String greatFactor(String m,int[] indexFraction,int[] integralPart,int molecule,int denominator)
-//    {
-//        for (int i = 0; i < m.length(); i++) {
-//            if (i < indexFraction[0]) {
-//                integralPart[0] = integralPart[0] + m.charAt(i) - '0';
-//            }else if (i > indexFraction[0] && i < indexFraction[1]) {
-//                molecule = molecule + m.charAt(i) - '0';
-//            }else if (i > indexFraction[1]){
-//                denominator = denominator + m.charAt(i) - '0';
-//            }
-//        }
-//    }
 
     /**
      * 化简分数
-     * @param x 为 操作数 的 分母
-     * @param y 为 操作数 的 分子
-     * @return formula 为 当前式子 的 字符串形式
+     * @param integralPart 为 分数的整数部分
+     * @param molecule 为 分数的分子部分
+     * @param denominator 为 分数的分母部分
+     * @return ansFormula 为 当前式子 的 最简分数表达形式
      */
-    public String greatFactor(int x,int y)
-    {
+    private String greatFraction (int integralPart,int molecule,int denominator) {
+        String ansFormula;
+        int commonFactor = 1;
 
+        //求最大公约数
         Create create = new Create();
-        if (y!=0) {
-            int commonFactor = create.commonFactor(x,y);
-            x /= commonFactor;
-            y /= commonFactor;
+        commonFactor = create.commonFactor(denominator,molecule);
+
+        //化简分数
+        denominator /= commonFactor;
+        molecule /= commonFactor;
+
+        //带分数 表示
+        if (integralPart == 0 && molecule > 0) {
+            ansFormula = String.valueOf(molecule) + '/' + String.valueOf(denominator);
+        } else if (molecule == 0)
+            ansFormula = String.valueOf(integralPart);
+        else {
+            ansFormula = String.valueOf(integralPart) + "'" + String.valueOf(molecule) + '/' + String.valueOf(denominator);
         }
-        return x+"/"+y;
+
+        //返回最简分数
+        return ansFormula;
     }
 }
