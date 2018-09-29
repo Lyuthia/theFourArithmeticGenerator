@@ -788,6 +788,12 @@ The four arithmetic generator
 
 ![生成成绩的代码覆盖率](https://i.imgur.com/ZhwcBRs.png)
 
+**附**
+
+[1万道 r=2 的 题目](https://github.com/Lyuthia/theFourArithmeticGenerator/blob/master/1wEX---r%3D2.txt "1万道 r=2 的 题目")
+
+[1万道 r=2 的 题目 对应的 答案](https://github.com/Lyuthia/theFourArithmeticGenerator/blob/master/1wAN---r%3D2.txt "对应的 答案")
+
 
 
 <br/>
