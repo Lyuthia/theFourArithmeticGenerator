@@ -45,7 +45,7 @@ public class problemSet {
                 for(int i=0;i<txtList.size();i++){
                     System.out.print(">");
                     q.println(i+1 + ". " +txtList.get(i));
-                    System.out.println(i+1 + ". " +txtList.get(i));
+                    //System.out.println(i+1 + ". " +txtList.get(i));
                 }
 
                 txtFile.close();

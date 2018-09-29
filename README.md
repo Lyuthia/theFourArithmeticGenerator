@@ -16,6 +16,7 @@ The four arithmetic generator
 > 2. `-n 10`
 > 3. `-r 20`
 > 4. `-e <exercisefile>.txt -a <answerfile>.txt`
+> 5. `-n 663 -r 1`
 
 
 
@@ -560,12 +561,27 @@ The four arithmetic generator
         System.arraycopy(ansFormula, 0, rPNotation, 0, ansFormula.length-1);
         boolean ifRepeat = false;
 
-        for (String[] ansFo: ansFoList) {
-            if (ansFo == rPNotation) ifRepeat =true;
-            else if (ansFo.length == rPNotation.length && ansFo[rPNotation.length-1].equals(rPNotation[rPNotation.length-1])){
-                for (int j=0;j<rPNotation.length;j=j+3) {
-                    if (ansFo[j].equals(rPNotation[j+1]) && ansFo[j+1].equals(rPNotation[j]) && ansFo[j+2].equals(rPNotation[j+2]))
-                        ifRepeat =true;
+		for (String[] ansFo: ansFoList) {
+            if (Arrays.equals(ansFo,rPNotation)) { //直接一一对应比较
+                ifRepeat = true;
+            } else if (ansFo.length == rPNotation.length && ansFo[ansFo.length-1].equals(rPNotation[rPNotation.length-1])){//若运算结果及长度一致，则式子可能重复，进一步比较
+                int j=0;
+                for (j=0;j<rPNotation.length-2;) {
+                    boolean opRight = ansFo[j+2].equals("＋")||ansFo[j+2].equals("×");
+                    boolean exRight = ansFo[j].equals(rPNotation[j + 1]) && ansFo[j + 1].equals(rPNotation[j]) && ansFo[j + 2].equals(rPNotation[j + 2]);
+                    boolean copRight = ansFo[j].equals(rPNotation[j]) && ansFo[j + 1].equals(rPNotation[j + 1]) && ansFo[j + 2].equals(rPNotation[j + 2]);
+                    //运算符前后两个操作数交换比较
+                    if (exRight&&opRight) {
+                        j = j + 3;
+                    } else if (copRight) {
+                        j = j + 3;
+                    } else {
+                        break;
+                    }
+                }
+                if (j == rPNotation.length-2) {
+                    ifRepeat = true;
+                    break;
                 }
             }
         }
@@ -781,20 +797,20 @@ The four arithmetic generator
 |-----------------|----------------------|-----------------|----------------|
 | Planning        | 计划                     |45              |45            |
 | · Estimate        | · 估计这个任务需要多少时间    |· 45        |· 45          |
-| Development     | 开发                      |960             |945          |
+| Development     | 开发                      |960             |1095         |
 | · Analysis        | · 需求分析 (包括学习新技术)   |· 120       |· 150        |
 | · Design Spec     | · 生成设计文档               |· 45        |· 60         |
 | · Design Review   | · 设计复审 (和同事审核设计文档)|· 45        |· 45         |
 | · Coding Standard | · 代码规范 (为目前的开发制定合适的规范)|· 30 |· 30         |
-| · Design          | · 具体设计              |· 120            |· 120        |
-| · Coding          | · 具体编码              |· 480            |· 420        |
-| · Code Review     | · 代码复审              |· 60             |· 30         |
+| · Design          | · 具体设计              |· 120            |· 180        |
+| · Coding          | · 具体编码              |· 480            |· 480        |
+| · Code Review     | · 代码复审              |· 60             |· 60         |
 | · Test            | · 测试（自我测试，修改代码，提交修改）|· 60  |· 90         |
 | Reporting         | 报告                   |105               |120          |
 | · Test Report     | · 测试报告              |· 45             |· 60         |
 | · Size Measurement| · 计算工作量            |· 30              |· 30        |
 | · Postmortem & Process Improvement Plan|· 事后总结, 并提出过程改进计划|· 30|· 30|
-| 合计              |                        |1110               |1110         |
+| 合计              |                        |1110               |1260         |
 
 
 

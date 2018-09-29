@@ -1,4 +1,6 @@
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class checkRepeat {
     private ArrayList<String> returnList = new ArrayList<>();
@@ -18,9 +20,14 @@ public class checkRepeat {
         for(int i=0;i<n;){
             //随机生成式子
             String[] ansFormula = create.createFormula(r);
-            //判断生成的式子是否重复
-            if (ansFormula!=null)
-                if (!ifRepeat(ansFormula)) i++;
+            //判断生成的式子是否重复-n 10000 -r 1
+            if (ansFormula!=null) {
+                //System.out.println("generFormula:"+ansFormula[ansFormula.length-1]);
+                if (!ifRepeat(ansFormula)) {
+                    System.out.println(i+":"+ansFormula[ansFormula.length-1]);
+                    i++;
+                }
+            }
         }
 
         //把式子及运算结果添加到returnList
@@ -46,13 +53,32 @@ public class checkRepeat {
         boolean ifRepeat = false;
 
         for (String[] ansFo: ansFoList) {
-            if (ansFo == rPNotation) ifRepeat =true;//直接一一对应比较
-            else if (ansFo.length == rPNotation.length && ansFo[rPNotation.length-1].equals(rPNotation[rPNotation.length-1])){//若运算结果及长度一致，则式子可能，进一步比较
-                for (int j=0;j<rPNotation.length;j=j+3) {
+            if (Arrays.equals(ansFo,rPNotation)) { //直接一一对应比较
+                ifRepeat = true;
+                //System.out.println("ansFo==rPNotation:"+Arrays.toString(ansFo)+"=="+Arrays.toString(rPNotation));
+            } else if (ansFo.length == rPNotation.length && ansFo[ansFo.length-1].equals(rPNotation[rPNotation.length-1])){//若运算结果及长度一致，则式子可能重复，进一步比较
+                int j=0;
+                for (j=0;j<rPNotation.length-2;) {
+                    //System.out.println(Arrays.toString(ansFo)+":"+Arrays.toString(rPNotation));
+                    boolean opRight = ansFo[j+2].equals("＋")||ansFo[j+2].equals("×");
+                    boolean exRight = ansFo[j].equals(rPNotation[j + 1]) && ansFo[j + 1].equals(rPNotation[j]) && ansFo[j + 2].equals(rPNotation[j + 2]);
+                    boolean copRight = ansFo[j].equals(rPNotation[j]) && ansFo[j + 1].equals(rPNotation[j + 1]) && ansFo[j + 2].equals(rPNotation[j + 2]);
                     //运算符前后两个操作数交换比较
-                    if (ansFo[j].equals(rPNotation[j+1]) && ansFo[j+1].equals(rPNotation[j]) && ansFo[j+2].equals(rPNotation[j+2]))
-                        ifRepeat =true;
+                    if (exRight&&opRight) {
+                        j = j + 3;
+                    } else if (copRight) {
+                        j = j + 3;
+                    } else {
+                        //System.out.println(formula+":"+opRight+","+exRight+","+"false ;j:"+j+"<---->ifRepeat:false");
+                        break;
+                    }
+                    //System.out.print(formula+":"+opRight+","+exRight+","+copRight+"  ;");
                 }
+                if (j == rPNotation.length-2) {
+                    ifRepeat = true;
+                    break;
+                }
+                //System.out.println("j:"+j+",rPNotation.length-5:"+(rPNotation.length-5)+"<---->ifRepeat:" + ifRepeat);
             }
         }
 
